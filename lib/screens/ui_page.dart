@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_ui_class/data/dummy_data.dart';
+import 'package:flutter_ui_class/models/card_data_model.dart';
+import 'package:flutter_ui_class/widgets/task_card_widget.dart';
 
 class UiPage extends StatefulWidget {
   const UiPage({super.key});
@@ -8,36 +11,53 @@ class UiPage extends StatefulWidget {
 }
 
 class _UiPageState extends State<UiPage> {
+
+
+  DummyData dummyData = DummyData();
+
+
   @override
   Widget build(BuildContext context) {
+    print("Building UI Page...");
+    
+
     return Scaffold(
       appBar: AppBar(
         title: Text("UI PAGE"),
         backgroundColor: Colors.purpleAccent,
       ),
 
-      body: Center(
-        child: InkWell(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
+      body: ListView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: dummyData.tasks.length,
+        itemBuilder: (context, index) {
+          final task = dummyData.tasks[index];
 
-          child: Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.purpleAccent,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              "GO BACK",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
+          return TaskCardWidget(
+            title: task.title,
+            subtitle: task.subtitle,
+            icon: task.icon,
+          );
+        },
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          dummyData.addTaskExternal(
+            CardDataModel(
+              title: "New Task",
+              subtitle: "This is a new task",
+              icon: Icons.add
+            )
+          );
+          setState(
+            (){
+              
+            }
+          );
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.purpleAccent,
       ),
     );
   }
