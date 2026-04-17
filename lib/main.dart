@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+// Import your Firebase options
+import 'firebase_options.dart';
+
+// Import your existing project files
 import 'package:flutter_ui_class/providers/task_management_provider.dart';
 import 'package:flutter_ui_class/screens/UI_page.dart';
-import 'package:provider/provider.dart';
 
-void main() {
+// Import the new Model and Repository you created
+import 'models/task_model.dart';
+import 'repositories/task_repository.dart';
+
+void main() async {
+  // Required for Firebase initialization
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(const FlutterUIApp());
 }
 
@@ -12,27 +29,25 @@ class FlutterUIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_)=> TaskManagementProvider()),
+        ChangeNotifierProvider(create: (_) => TaskManagementProvider()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Firebase Bonus',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
         ),
-        home: const HomePage(title: 'FLUTTER UI DEMO'),
+        home: const HomePage(title: 'FLUTTER UI & FIREBASE'),
       ),
     );
   }
 }
 
-
-
-class HomePage extends StatefulWidget { 
+class HomePage extends StatefulWidget {
   final String title;
-
   const HomePage({super.key, required this.title});
 
   @override
@@ -43,130 +58,140 @@ class _HomePageState extends State<HomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
-    _counter++;
-    print('Counter value: $_counter');
-    setState(() {});
+    setState(() {
+      _counter++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-          ),
-        ),
+        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.purpleAccent,
       ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
-
       body: Center(
-        child: Container(
-          height: 190,
-          width: 350,
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey, width: .5),
-            color: Colors.grey.withAlpha(50),
-          ),
-
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-
-            children: [
-              Text('Counter app', style: TextStyle(fontSize: 24)),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // YOUR ORIGINAL COUNTER UI
+            Container(
+              height: 150,
+              width: 350,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.grey.withAlpha(30),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Column(
                 children: [
-                  Text('The current value is', style: TextStyle(fontSize: 15)),
-
-                  SizedBox(width: 5),
-
-                  Text(
-                    _counter.toString(),
-                    style: TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.purpleAccent,
-                    ),
-                  ),
-
-                  SizedBox(width: 5),
-
-                  Icon(Icons.timelapse, color: Colors.purpleAccent, size: 30),
+                  const Text('Counter value:', style: TextStyle(fontSize: 18)),
+                  Text('$_counter', style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.purple)),
+                  ElevatedButton(onPressed: _incrementCounter, child: const Text("Increment")),
                 ],
               ),
+            ),
 
-              SizedBox(height: 20),
+            const SizedBox(height: 30),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _incrementCounter,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purpleAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: Text('Increment Counter'),
-                  ),
-
-                  SizedBox(width: 20),
-
-                  IconButton(
-                    onPressed: (){
-                      // home -> page 2 -> page 3 -> page 4 -> page 5
-
-                      // |Page 5 |
-                      // |Page 4 |
-                      // |Page 3 |
-                      // |Page 2 |  
-                      // |Home   |
-
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => UiPage(),)
-                      );
-
-
-                    },
-                    color: Colors.purpleAccent,
-                    iconSize: 40,
-                    icon: Icon(Icons.arrow_circle_right),
-                  ),
-                ],
+            // BONUS ASSIGNMENT NAVIGATION BUTTON
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const FirebaseTaskScreen()),
+                );
+              },
+              icon: const Icon(Icons.storage),
+              label: const Text("GO TO FIREBASE TASKS"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orangeAccent,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
 
-      floatingActionButton: FloatingActionButton(
-        // onPressed: _incrementCounter,
-        onPressed: () {
-          _incrementCounter();
+// --- NEW SCREEN FOR THE BONUS ASSIGNMENT ---
+class FirebaseTaskScreen extends StatefulWidget {
+  const FirebaseTaskScreen({super.key});
+
+  @override
+  State<FirebaseTaskScreen> createState() => _FirebaseTaskScreenState();
+}
+
+class _FirebaseTaskScreenState extends State<FirebaseTaskScreen> {
+  final TaskRepository _repo = TaskRepository();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+  void _showAddDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Task to Firestore'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: _titleController, decoration: const InputDecoration(hintText: 'Task Title')),
+            TextField(controller: _descController, decoration: const InputDecoration(hintText: 'Description')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              if (_titleController.text.isNotEmpty) {
+                _repo.addTask(TaskModel(
+                  title: _titleController.text,
+                  description: _descController.text,
+                ));
+                _titleController.clear();
+                _descController.clear();
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Firebase Real-time Tasks'), backgroundColor: Colors.orangeAccent),
+      body: StreamBuilder<List<TaskModel>>(
+        stream: _repo.getTasks(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData || snapshot.data!.isEmpty) return const Center(child: Text("No tasks in Firestore"));
+
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              final task = snapshot.data![index];
+              return ListTile(
+                title: Text(task.title),
+                subtitle: Text(task.description),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _repo.deleteTask(task.id!),
+                ),
+              );
+            },
+          );
         },
-
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddDialog,
+        backgroundColor: Colors.orangeAccent,
         child: const Icon(Icons.add),
       ),
     );
